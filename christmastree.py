@@ -3,6 +3,7 @@ Configure different LED patterns
 '''
 from tree import FastRGBChristmasTree
 from time import sleep
+from random import random
 
 def random_colour():
     h = random()
