@@ -86,7 +86,7 @@ def sparkle(count):
         x = x + 1
     return()
 
-def random(count):
+def randomcolour(count):
     x = 0
     tree = FastRGBChristmasTree()
     while x < count:
@@ -104,5 +104,5 @@ if __name__ == '__main__':
     swirl(10)
     spin(10)
     sparkle(10)
-    random(10)
+    randomcolour(10)
     
