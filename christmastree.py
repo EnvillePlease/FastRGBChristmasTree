@@ -105,6 +105,6 @@ if __name__ == '__main__':
     
     swirl(10)
     spin(10)
-    sparkle(10)
-    randomcolour(10)
+    sparkle(100)
+    randomcolour(100)
     
