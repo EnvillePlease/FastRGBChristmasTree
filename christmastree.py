@@ -16,6 +16,12 @@ def random_colour():
 def swirl(count):
     x=0
     
+    tree = FastRGBChristmasTree()
+    i = 0
+    j = 1
+    k = 2
+    l = 3
+    
     tree[3] = [255,255,255]
     while x < count:
         tree[:,i*2]   = [[255, 0, 0], [255, 255, 0], [0, 255, 0]]
@@ -51,11 +57,7 @@ def random(count):
 
 
 if __name__ == '__main__':
-    tree = FastRGBChristmasTree()
-    i = 0
-    j = 1
-    k = 2
-    l = 3
+
     
     swirl(10)
     
