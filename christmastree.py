@@ -102,9 +102,10 @@ def randomcolour(count):
 
 if __name__ == '__main__':
 
-    
-    swirl(10)
-    spin(10)
-    sparkle(100)
-    randomcolour(100)
+    while True:
+        swirl(50)
+        spin(50)
+        sparkle(200)
+        randomcolour(200)
+        
     
