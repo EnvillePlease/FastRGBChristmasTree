@@ -75,9 +75,26 @@ def spin(count):
     return()
 
 def sparkle(count):
+    x = 0
+    
+    tree = FastRGBChristmasTree()
+    while x < count:
+        for i in range(0,25):
+            on = 255 if random() < 0.66 else 0
+            tree[i] = [1, on, on, on]
+        tree.commit()
+        x = x + 1
     return()
 
 def random(count):
+    x = 0
+    tree = FastRGBChristmasTree()
+    while x < count:
+        for i in range(0,25):
+            rgb = random_colour()
+            tree[i] = [1, rgb[0], rgb[1], rgb[2]]
+        tree.commit()
+        x = x + 1
     return()
 
 
@@ -86,4 +103,6 @@ if __name__ == '__main__':
     
     swirl(10)
     spin(10)
+    sparkle(10)
+    random(10)
     
