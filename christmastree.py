@@ -1,111 +1,161 @@
 '''
-Configure different LED patterns
+Configure different LED patterns for RGB Christmas Tree
+This module provides various lighting effects including swirl, spin, sparkle, and random colour patterns.
 '''
 from tree import FastRGBChristmasTree
 from time import sleep
 from random import random
 from colorzero import Color
+from collections import deque
+
+# Constants for tree configuration
+NUM_LEDS = 25
+NUM_SEGMENTS = 8
+STAR_INDEX = 3
+DEFAULT_FRAME_DELAY = 0.5
+
+# Pre-defined colours for reuse (avoids repeated list creation)
+WHITE = [255, 255, 255]
+RED = [255, 0, 0]
+GREEN = [0, 255, 0]
+BLUE = [0, 0, 255]
+YELLOW = [255, 255, 0]
+MAGENTA = [255, 0, 255]
+CYAN = [0, 255, 255]
+OFF = [0, 0, 0]
+
+# Colour gradients for swirl effect (pre-defined to avoid recreation each frame)
+GRADIENT_RYG = [RED, YELLOW, GREEN]        # Red->Yellow->Green
+GRADIENT_YGB = [YELLOW, GREEN, BLUE]       # Yellow->Green->Blue
+GRADIENT_GBR = [GREEN, BLUE, RED]          # Green->Blue->Red
+GRADIENT_BRY = [BLUE, RED, YELLOW]         # Blue->Red->Yellow
+
 
 def random_colour():
-    h = random()
-    s = 1
-    v = 1
-    hsv = Color.from_hsv(h,s,v)
-    rgb = list(hsv.rgb)
-    rgb = [int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255)]
-    return (rgb)
-
-def swirl(count):
-    x=0
+    """
+    Generate a random fully saturated, full brightness colour.
     
+    Uses HSV colour space with random hue to ensure vibrant colours.
+    
+    Returns:
+        list: RGB values as integers [0-255, 0-255, 0-255]
+    """
+    # Create colour directly with random hue, full saturation and value
+    colour = Color.from_hsv(random(), 1, 1)
+    
+    # Convert from colorzero's 0-1 RGB range to 0-255 integer range
+    return [int(c * 255) for c in colour.rgb]
+
+
+def swirl(count, delay=DEFAULT_FRAME_DELAY):
+    """
+    Create a rotating swirl pattern with colour bands across tree layers.
+    
+    Each layer displays different colours that rotate around the tree,
+    creating a candy-cane like swirling effect.
+    
+    Args:
+        count: Number of animation frames to display
+        delay: Time in seconds between frames (default: 0.5)
+    """
     tree = FastRGBChristmasTree()
-    i = 0
-    j = 1
-    k = 2
-    l = 3
     
-    tree[3] = [255,255,255]
-    while x < count:
-        tree[:,i*2]   = [[255, 0, 0], [255, 255, 0], [0, 255, 0]]
-        tree[:,i*2+1] = [[255, 0, 0], [255, 255, 0], [0, 255, 0]]
-        tree[:,j*2]   = [[255, 255, 0], [0, 255, 0], [0, 0, 255]]
-        tree[:,j*2+1] = [[255, 255, 0], [0, 255, 0], [0, 0, 255]]
-        tree[:,k*2]   = [[0, 255, 0], [0, 0, 255], [255, 0, 0]]
-        tree[:,k*2+1] = [[0, 255, 0], [0, 0, 255], [255, 0, 0]]
-        tree[:,l*2]   = [[0, 0, 255], [255, 0, 0], [255, 255, 0]]
-        tree[:,l*2+1] = [[0, 0, 255], [255, 0, 0], [255, 255, 0]]
+    # Use deque for efficient rotation of gradient patterns
+    gradients = deque([GRADIENT_RYG, GRADIENT_YGB, GRADIENT_GBR, GRADIENT_BRY])
+    
+    # Set the star/top LED to white (only needs to be set once)
+    tree[STAR_INDEX] = WHITE
+    
+    for _ in range(count):
+        # Assign colour gradients to each segment pair
+        for segment_pair, gradient in enumerate(gradients):
+            tree[:, segment_pair * 2] = gradient
+            tree[:, segment_pair * 2 + 1] = gradient
 
-        tree.commit()
+        tree.commit()  # Send the LED data to the tree
 
-        t = i
-        i = j
-        j = k
-        k = l
-        l = t
+        # Rotate gradients for spinning effect (deque rotation is O(1))
+        gradients.rotate(-1)
         
-        x = x +1
-        
-        sleep(0.5)
-    return()
+        sleep(delay)
 
-def spin(count):
-    x = 0
+
+def spin(count, delay=DEFAULT_FRAME_DELAY):
+    """
+    Create a spinning colour wheel effect around the tree.
     
+    8 different colours are assigned to 8 segments and rotate
+    around the tree creating a spinning wheel appearance.
+    
+    Args:
+        count: Number of animation frames to display
+        delay: Time in seconds between frames (default: 0.5)
+    """
     tree = FastRGBChristmasTree()
-    i = list(range(0,8))
+    
+    # Use deque for efficient rotation of colours
+    colours = deque([WHITE, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, CYAN])
 
-    tree[3] = [255,255,255]
-    while x < count:
-        tree[:,i[0]] = [255, 255, 255]
-        tree[:,i[1]] = [255, 0, 0]
-        tree[:,i[2]] = [0, 255, 0]
-        tree[:,i[3]] = [0, 0, 255]
-        tree[:,i[4]] = [255, 255, 255]
-        tree[:,i[5]] = [255, 255, 0]
-        tree[:,i[6]] = [255, 0, 255]
-        tree[:,i[7]] = [0, 255, 255]
+    # Set the star/top LED to white (only needs to be set once)
+    tree[STAR_INDEX] = WHITE
+    
+    for _ in range(count):
+        # Assign colours to segments around the tree
+        for segment, colour in enumerate(colours):
+            tree[:, segment] = colour
 
+        tree.commit()  # Send the LED data to the tree
+
+        # Rotate colours for spinning effect (deque rotation is O(1))
+        colours.rotate(-1)
+
+        sleep(delay)
+
+
+def sparkle(count, on_probability=0.66):
+    """
+    Create a random twinkling/sparkling white light effect.
+    
+    Each LED has a configurable chance of being on (white) or off each frame,
+    creating a twinkling star-like effect.
+    
+    Args:
+        count: Number of animation frames to display
+        on_probability: Chance (0-1) that each LED is on (default: 0.66)
+    """
+    tree = FastRGBChristmasTree()
+    
+    for _ in range(count):
+        for i in range(NUM_LEDS):
+            # Determine if LED should be on based on probability
+            brightness = 255 if random() < on_probability else 0
+            tree[i] = [1, brightness, brightness, brightness]
         tree.commit()
 
-        t = i[0]
-        for j in range(0,7):
-            i[j] = i[j+1]
-        i[7] = t
-
-        x = x + 1
-        sleep(0.5)
-    return()
-
-def sparkle(count):
-    x = 0
-    
-    tree = FastRGBChristmasTree()
-    while x < count:
-        for i in range(0,25):
-            on = 255 if random() < 0.66 else 0
-            tree[i] = [1, on, on, on]
-        tree.commit()
-        x = x + 1
-    return()
 
 def randomcolour(count):
-    x = 0
+    """
+    Display random vibrant colours on all LEDs.
+    
+    Each LED gets a randomly generated fully saturated colour,
+    creating a colourful disco-like effect.
+    
+    Args:
+        count: Number of animation frames to display
+    """
     tree = FastRGBChristmasTree()
-    while x < count:
-        for i in range(0,25):
+    
+    for _ in range(count):
+        for i in range(NUM_LEDS):
             rgb = random_colour()
-            tree[i] = [1, rgb[0], rgb[1], rgb[2]]
+            tree[i] = [1, *rgb]  # Unpack RGB values using splat operator
         tree.commit()
-        x = x + 1
-    return()
 
 
 if __name__ == '__main__':
-
+    # Main loop - continuously cycle through all lighting effects
     while True:
-        swirl(75)
-        spin(75)
-        sparkle(300)
-        randomcolour(300)
-        
-    
+        swirl(75)          # Swirling colour bands - ~37.5 seconds
+        spin(75)           # Spinning colour wheel - ~37.5 seconds
+        sparkle(300)       # Twinkling white lights
+        randomcolour(300)  # Random disco colours
