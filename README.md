@@ -65,3 +65,7 @@ If you want to go even faster, you might want to mod your Christmas tree. Please
 [1]: https://thepihut.com/products/3d-rgb-xmas-tree-for-raspberry-pi
 [2]: https://github.com/ThePiHut/rgbxmastree#rgbxmastree
 [3]: https://numpy.org/doc/stable/user/basics.indexing.html
+
+When installing numpy python packing in Python3.11 environments on Raspberry Pi Bookworm or higher make sure you have the following library installed.
+
+apt-get install libopenblas-dev
