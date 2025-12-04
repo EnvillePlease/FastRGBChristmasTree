@@ -68,4 +68,6 @@ If you want to go even faster, you might want to mod your Christmas tree. Please
 
 When installing numpy python packing in Python3.11 environments on Raspberry Pi Bookworm or higher make sure you have the following library installed.
 
-apt-get install libopenblas-dev
+```sh
+sudo apt-get install libopenblas-dev
+```
